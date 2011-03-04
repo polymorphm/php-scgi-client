@@ -91,7 +91,6 @@ function php_scgi_client__main() {
     try {
         //$socket = php_scgi_client__socket_connect_or_error();
         
-        
         // BEGIN TEST (only test)
         
         header('Content-Type: text/plain;charset=utf-8');
