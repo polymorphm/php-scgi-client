@@ -84,11 +84,11 @@ function php_scgi_client__socket_connect_or_error() {
         
         if($success) {
             return $socket;
+        } else {
+            @socket_close($socket);
+            
+            throw new php_scgi_client__error($socket_file.': Can\'t connect to socket file');
         }
-        
-        @socket_close($socket);
-        
-        throw new php_scgi_client__error($socket_file.': Can\'t connect to socket file');
     }
 }
 
