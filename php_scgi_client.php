@@ -89,6 +89,24 @@ function php_scgi_client__socket_connect_or_error() {
     }
 }
 
+function php_scgi_client__format_output() {
+    $environ = php_scgi_client__get_cgi_environ();
+    $post_data = php_scgi_client__get_post_data();
+    $content_length = strlen($post_data);
+    
+    $headers =
+            sprintf("%s\x00%s\x00", 'CONTENT_LENGTH', $content_length).
+            sprintf("%s\x00%s\x00", 'SCGI', 1);
+    
+    foreach($environ as $k => $v) {
+        $headers .= sprintf("%s\x00%s\x00", $k, $v);
+    }
+    
+    $output = strlen($headers).':'.$headers.','.$post_data;
+    
+    return $output;
+}
+
 function php_scgi_client__main() {
     try {
         //$socket = php_scgi_client__socket_connect_or_error();
@@ -97,16 +115,9 @@ function php_scgi_client__main() {
         
         header('Content-Type: text/plain;charset=utf-8');
         
-        $cgi_environ = php_scgi_client__get_cgi_environ();
-        $post_data = php_scgi_client__get_post_data();
+        $output = php_scgi_client__format_output();
         
-        printf("%s\n", '*** BEGIN ***');
-        foreach($cgi_environ as $k => $v) {
-            printf("%s=%s\n", $k, $v);
-        }
-        printf("%s\n", '*** POST_DATA ***');
-        printf("%s\n", $post_data);
-        printf("%s\n", '*** END ***');
+        echo $output;
         
         // END TEST
     } catch(php_scgi_client__error $e) {
