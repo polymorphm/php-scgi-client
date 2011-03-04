@@ -116,8 +116,6 @@ function php_scgi_client__format_status_header($header) {
 
 function php_scgi_client__main() {
     try {
-        @header('Content-Type: text/plain;charset=utf-8'); // TEST
-        
         $fd = php_scgi_client__fsockopen_or_error();
         
         $output = php_scgi_client__format_output();
