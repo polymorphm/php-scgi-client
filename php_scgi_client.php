@@ -121,9 +121,8 @@ function php_scgi_client__main() {
         $fd = php_scgi_client__fsockopen_or_error();
         
         $output = php_scgi_client__format_output();
-        $output_len = strlen($output);
         
-        for($all_written = 0; $all_written < $output_len; $all_written += $written) {
+        for($all_written = 0; $all_written < strlen($output); $all_written += $written) {
             $written = @fwrite($fd, substr($output, $all_written));
             if($written === FALSE || $written === NULL) {
                 break;
