@@ -73,22 +73,18 @@ function php_scgi_client__get_conf() {
     }
 }
 
-function php_scgi_client__socket_connect_or_error() {
+function php_scgi_client__fsockopen_or_error() {
     $conf = php_scgi_client__get_conf();
     $socket_file = $conf['SOCKET_FILE'];
     
-    $socket = @socket_create(AF_UNIX, SOCK_STREAM, 0);
+    $fd = @fsockopen($socket_file);
     
-    if($socket) {
-        $success = @socket_connect($socket, $socket_file);
+    if($fd !== FALSE && $fd !== NULL) {
+        return $fd;
+    } else {
+        @fclose($fd);
         
-        if($success) {
-            return $socket;
-        } else {
-            @socket_close($socket);
-            
-            throw new php_scgi_client__error($socket_file.': Can\'t connect to socket file');
-        }
+        throw new php_scgi_client__error($socket_file.': Can\'t connect to socket file');
     }
 }
 
@@ -116,24 +112,28 @@ function php_scgi_client__main() {
         
         echo 'BEGIN; '; // TEST
         
-        $socket = php_scgi_client__socket_connect_or_error();
+        $fd = php_scgi_client__fsockopen_or_error();
         
         $output = php_scgi_client__format_output();
         $output_len = strlen($output);
         
          echo '000; '; // TEST
         
-        for($written = 0; $written < $output_len; $written += $fwrite) {
-            $fwrite = @fwrite($socket, substr($output, $written));
-            if($fwrite === FALSE || $fwrite === NULL) {
+        for($all_written = 0; $all_written < $output_len; $all_written += $written) {
+            $written = @fwrite($fd, substr($output, $written));
+            if($written === FALSE || $written === NULL) {
                 break;
             }
         }
         
+        echo '111; '; // TEST
+        
+        @fflush($fd);
+        
         echo '222; '; // TEST
         
         for(;;) {
-            $raw_header = @fgets($socket);
+            $raw_header = @fgets($fd);
             
             if($raw_header !== FALSE && $raw_header !== NULL) {
                 $header = trim($raw_header);
@@ -147,10 +147,10 @@ function php_scgi_client__main() {
         echo '333; '; // TEST
         
         for(;;) {
-            $contents = @fread($socket, 8192);
+            $data = @fread($fd, 8192);
             
-            if($contents !== FALSE && $contents !== NULL) {
-                echo $contents;
+            if($data !== FALSE && $data !== NULL) {
+                echo $data;
             } else {
                 break;
             }
@@ -158,7 +158,7 @@ function php_scgi_client__main() {
         
         echo '444; '; // TEST
         
-        @fclose($socket);
+        @fclose($fd);
         
         echo 'END; '; // TEST
     } catch(php_scgi_client__error $e) {
