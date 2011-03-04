@@ -131,14 +131,14 @@ function php_scgi_client__main() {
                 break;
             }
             
-            if($raw_header !== FALSE && $raw_header !== NULL) {
+            if($raw_header !== FALSE && strlen($raw_header) !== 0) {
                 $header = trim($raw_header);
-                
-                if($header) {
-                    header($header);
-                } else {
-                    break;
-                }
+            } else {
+                break;
+            }
+            
+            if($header) {
+                header($header);
             } else {
                 break;
             }
@@ -151,7 +151,7 @@ function php_scgi_client__main() {
                 break;
             }
             
-            if($data !== FALSE && $data !== NULL) {
+            if($data !== FALSE && strlen($data) !== 0) {
                 echo $data;
             } else {
                 break;
