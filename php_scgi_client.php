@@ -122,7 +122,7 @@ function php_scgi_client__main() {
         
         for($all_written = 0; $all_written < strlen($output); $all_written += $written) {
             $written = @fwrite($fd, substr($output, $all_written));
-            if($written === FALSE || $written === NULL) {
+            if($written === FALSE || !$written) {
                 break;
             }
         }
