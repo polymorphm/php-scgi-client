@@ -17,8 +17,11 @@
 // along with "PHP SCGI Client".  If not, see <http://www.gnu.org/licenses/>.
 
 $PHP_SCGI_CLIENT__CGI_ENVIRON_BLACK_LIST = array(
+    // for protecting from dublication (when headers formating process):
     'CONTENT_LENGTH',
     'SCGI',
+    
+    // for protecting from PHP specifics:
     'SCRIPT_FILENAME',
     'SCRIPT_NAME',
     'PATH_TRANSLATED',
