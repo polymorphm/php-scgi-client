@@ -110,15 +110,10 @@ function php_scgi_client__main() {
     try {
         @header('Content-Type: text/plain;charset=utf-8'); // TEST
         
-        $TEST_TIME = time();
-        echo 'BEGIN-'.abs(time() - $TEST_TIME).'; '; // TEST
-        
         $fd = php_scgi_client__fsockopen_or_error();
         
         $output = php_scgi_client__format_output();
         $output_len = strlen($output);
-        
-         echo '000-'.abs(time() - $TEST_TIME).'; '; // TEST
         
         for($all_written = 0; $all_written < $output_len; $all_written += $written) {
             $written = @fwrite($fd, substr($output, $all_written));
@@ -127,11 +122,7 @@ function php_scgi_client__main() {
             }
         }
         
-        echo '111-'.abs(time() - $TEST_TIME).'; '; // TEST
-        
         @fflush($fd);
-        
-        echo '222-'.abs(time() - $TEST_TIME).'; '; // TEST
         
         for(;;) {
             if(!feof($fd)) {
@@ -153,8 +144,6 @@ function php_scgi_client__main() {
             }
         }
         
-        echo '333-'.abs(time() - $TEST_TIME).'; '; // TEST
-        
         for(;;) {
             if(!feof($fd)) {
                 $data = @fread($fd, 8192);
@@ -169,11 +158,7 @@ function php_scgi_client__main() {
             }
         }
         
-        echo '444-'.abs(time() - $TEST_TIME).'; '; // TEST
-        
         @fclose($fd);
-        
-        echo 'END-'.abs(time() - $TEST_TIME).'; '; // TEST
     } catch(php_scgi_client__error $e) {
         @header('Content-Type: text/plain;charset=utf-8');
         
