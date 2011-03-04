@@ -110,14 +110,15 @@ function php_scgi_client__main() {
     try {
         @header('Content-Type: text/plain;charset=utf-8'); // TEST
         
-        echo 'BEGIN; '; // TEST
+        $TEST_TIME = time();
+        echo 'BEGIN-'.abs(time() - $TEST_TIME).'; '; // TEST
         
         $fd = php_scgi_client__fsockopen_or_error();
         
         $output = php_scgi_client__format_output();
         $output_len = strlen($output);
         
-         echo '000; '; // TEST
+         echo '000-'.abs(time() - $TEST_TIME).'; '; // TEST
         
         for($all_written = 0; $all_written < $output_len; $all_written += $written) {
             $written = @fwrite($fd, substr($output, $all_written));
@@ -126,14 +127,18 @@ function php_scgi_client__main() {
             }
         }
         
-        echo '111; '; // TEST
+        echo '111-'.abs(time() - $TEST_TIME).'; '; // TEST
         
         @fflush($fd);
         
-        echo '222; '; // TEST
+        echo '222-'.abs(time() - $TEST_TIME).'; '; // TEST
         
         for(;;) {
-            $raw_header = @fgets($fd);
+            if(!feof($fd)) {
+                $raw_header = @fgets($fd);
+            } else {
+                break;
+            }
             
             if($raw_header !== FALSE && $raw_header !== NULL) {
                 $header = trim($raw_header);
@@ -148,10 +153,14 @@ function php_scgi_client__main() {
             }
         }
         
-        echo '333; '; // TEST
+        echo '333-'.abs(time() - $TEST_TIME).'; '; // TEST
         
         for(;;) {
-            $data = @fread($fd, 8192);
+            if(!feof($fd)) {
+                $data = @fread($fd, 8192);
+            } else {
+                break;
+            }
             
             if($data !== FALSE && $data !== NULL) {
                 echo $data;
@@ -160,11 +169,11 @@ function php_scgi_client__main() {
             }
         }
         
-        echo '444; '; // TEST
+        echo '444-'.abs(time() - $TEST_TIME).'; '; // TEST
         
         @fclose($fd);
         
-        echo 'END; '; // TEST
+        echo 'END-'.abs(time() - $TEST_TIME).'; '; // TEST
     } catch(php_scgi_client__error $e) {
         @header('Content-Type: text/plain;charset=utf-8');
         
