@@ -55,7 +55,7 @@ function php_scgi_client__get_post_data() {
     global $php_scgi_client__post_data_cache;
     
     if($php_scgi_client__post_data_cache === NULL) {
-        $php_scgi_client__post_data_cache = file_get_contents("php://input");
+        $php_scgi_client__post_data_cache = file_get_contents('php://input');
     }
     
     return $php_scgi_client__post_data_cache;
