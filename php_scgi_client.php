@@ -106,6 +106,14 @@ function php_scgi_client__format_output() {
     return $output;
 }
 
+function php_scgi_client__format_status_header($header) {
+    if(substr($header, 0, strlen('Status: '))) {
+        $header = 'HTTP/1.0 '.substr($header, strlen('Status: '));
+    }
+    
+    return $header;
+}
+
 function php_scgi_client__main() {
     try {
         @header('Content-Type: text/plain;charset=utf-8'); // TEST
@@ -124,6 +132,7 @@ function php_scgi_client__main() {
         
         @fflush($fd);
         
+        $is_first_header = TRUE;
         for(;;) {
             if(!feof($fd)) {
                 $raw_header = @fgets($fd);
@@ -138,6 +147,11 @@ function php_scgi_client__main() {
             }
             
             if($header) {
+                if($is_first_header) {
+                    $is_first_header = FALSE;
+                    $header = php_scgi_client__format_status_header($header);
+                }
+                
                 header($header);
             } else {
                 break;
