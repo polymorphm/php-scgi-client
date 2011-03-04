@@ -17,6 +17,7 @@
 // along with "PHP SCGI Client".  If not, see <http://www.gnu.org/licenses/>.
 
 $PHP_SCGI_CLIENT__CGI_ENVIRON_BLACK_LIST = array(
+    'CONTENT_LENGTH',
     'SCRIPT_FILENAME',
     'SCRIPT_NAME',
     'PATH_TRANSLATED',
