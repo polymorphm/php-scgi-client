@@ -120,7 +120,7 @@ function php_scgi_client__main() {
          echo '000; '; // TEST
         
         for($all_written = 0; $all_written < $output_len; $all_written += $written) {
-            $written = @fwrite($fd, substr($output, $written));
+            $written = @fwrite($fd, substr($output, $all_written));
             if($written === FALSE || $written === NULL) {
                 break;
             }
@@ -138,7 +138,11 @@ function php_scgi_client__main() {
             if($raw_header !== FALSE && $raw_header !== NULL) {
                 $header = trim($raw_header);
                 
-                header($header);
+                if($header) {
+                    header($header);
+                } else {
+                    break;
+                }
             } else {
                 break;
             }
