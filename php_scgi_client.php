@@ -165,7 +165,7 @@ function php_scgi_client__main() {
                     $header = php_scgi_client__format_status_header($header);
                 }
                 
-                header($header);
+                header($header, FALSE);
             } else {
                 break;
             }
