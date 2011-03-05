@@ -121,10 +121,14 @@ function php_scgi_client__format_output() {
 
 function php_scgi_client__format_status_header($header) {
     // Apache HTTP Server -- not understands header "Status: ..."
-    // but it understands header "HTTP/1.0 ..."
+    // but it understands header "HTTP/X.Y ..."
+    
+    if(!array_key_exists('SERVER_PROTOCOL', $_SERVER)) {
+        throw new php_scgi_client__error('HTTP-server not defined parameter \'SERVER_PROTOCOL\'');
+    }
     
     if(substr($header, 0, strlen('Status: '))) {
-        $header = 'HTTP/1.0 '.substr($header, strlen('Status: '));
+        $header = $_SERVER['SERVER_PROTOCOL'].' '.substr($header, strlen('Status: '));
     }
     
     return $header;
