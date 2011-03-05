@@ -16,6 +16,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with "PHP SCGI Client".  If not, see <http://www.gnu.org/licenses/>.
 
+$PHP_SCGI_CLIENT__DEFAULT_CONF = array(
+    'SOCKET_FILE' => NULL,
+);
+
 $PHP_SCGI_CLIENT__CGI_ENVIRON_BLACK_LIST = array(
     // for protecting from dublication (when headers formating process):
     'CONTENT_LENGTH',
@@ -62,20 +66,29 @@ function php_scgi_client__get_post_data() {
 }
 
 function php_scgi_client__get_conf() {
+    global $PHP_SCGI_CLIENT__DEFAULT_CONF;
+    
+    $conf = $PHP_SCGI_CLIENT__DEFAULT_CONF;
     $conf_file = dirname(__FILE__).'/php_scgi_client_conf.php';
     
     if(file_exists($conf_file)) {
         require_once $conf_file;
         
-        return $PHP_SCGI_CLIENT_CONF__CONF;
-    } else {
-        throw new php_scgi_client__error($conf_file.': Configuration file is not found');
+        if(isset($PHP_SCGI_CLIENT_CONF__CONF)) {
+            $conf = array_merge($conf, $PHP_SCGI_CLIENT_CONF__CONF);
+        }
     }
+    
+    return $conf;
 }
 
 function php_scgi_client__fsockopen_or_error() {
     $conf = php_scgi_client__get_conf();
     $socket_file = $conf['SOCKET_FILE'];
+    
+    if(!$socket_file) {
+        throw new php_scgi_client__error('Parameter \'SOCKET_FILE\' is not configured');
+    }
     
     $fd = @fsockopen($socket_file);
     
