@@ -120,6 +120,9 @@ function php_scgi_client__format_output() {
 }
 
 function php_scgi_client__format_status_header($header) {
+    // Apache HTTP Server -- not understands header "Status: ..."
+    // but it understands header "HTTP/1.0 ..."
+    
     if(substr($header, 0, strlen('Status: '))) {
         $header = 'HTTP/1.0 '.substr($header, strlen('Status: '));
     }
