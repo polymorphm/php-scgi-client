@@ -101,8 +101,6 @@ function php_scgi_client__fsockopen_or_error() {
     if($fd !== FALSE && $fd !== NULL) {
         return $fd;
     } else {
-        @fclose($fd);
-        
         throw new php_scgi_client__connection_error($socket_file.': Can\'t connect to socket file');
     }
 }
