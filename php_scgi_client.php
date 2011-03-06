@@ -19,8 +19,7 @@
 $PHP_SCGI_CLIENT__DEFAULT_CONF = array(
     'SOCKET_FILE' => NULL,
     'SCGI_DAEMON_AUTO_START' => FALSE,
-    'SCGI_DAEMON_START_CMD' => NULL,
-    'SCGI_DAEMON_START_SLEEP' => 3000,
+    'SCGI_DAEMON_START_CMD' => dirname(__FILE__).'/scgi-daemon-start',
 );
 
 $PHP_SCGI_CLIENT__CGI_ENVIRON_BLACK_LIST = array(
@@ -104,6 +103,33 @@ function php_scgi_client__fsockopen_or_error() {
     }
 }
 
+function php_scgi_client__fsockopen() {
+    try {
+        $fd = php_scgi_client__fsockopen_or_error();
+    } catch(php_scgi_client__connection_error $e) {
+        $conf = php_scgi_client__get_conf();
+        
+        if($conf['SCGI_DAEMON_AUTO_START']) {
+            $cmd = $conf['SCGI_DAEMON_START_CMD'];
+            $slp = $conf['SCGI_DAEMON_START_SLEEP'];
+            
+            if(!$cmd) {
+                throw new php_scgi_client__error('Parameter \'SCGI_DAEMON_START_CMD\' is not configured');
+            }
+            
+            // start SCGI-daemon:
+            system($cmd);
+            
+            // second trying to connect:
+            $fd = php_scgi_client__fsockopen_or_error();
+        } else {
+            throw $e;
+        }
+    }
+    
+    return $fd;
+}
+
 function php_scgi_client__format_output() {
     $environ = php_scgi_client__get_cgi_environ();
     $post_data = php_scgi_client__get_post_data();
@@ -139,7 +165,7 @@ function php_scgi_client__format_status_header($header) {
 
 function php_scgi_client__main() {
     try {
-        $fd = php_scgi_client__fsockopen_or_error();
+        $fd = php_scgi_client__fsockopen();
         
         $output = php_scgi_client__format_output();
         
