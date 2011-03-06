@@ -19,7 +19,7 @@
 $PHP_SCGI_CLIENT__DEFAULT_CONF = array(
     'SOCKET_FILE' => NULL,
     'SCGI_DAEMON_AUTO_START' => FALSE,
-    'SCGI_DAEMON_START_CMD' => dirname(__FILE__).'/scgi-daemon-start',
+    'SCGI_DAEMON_START_CMD' => escapeshellarg(dirname(__FILE__).'/scgi-daemon-start'),
 );
 
 $PHP_SCGI_CLIENT__CGI_ENVIRON_BLACK_LIST = array(

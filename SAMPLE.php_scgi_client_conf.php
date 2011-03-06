@@ -9,7 +9,7 @@ function php_scgi_client_conf__get_conf() {
         //'SCGI_DAEMON_AUTO_START' => FALSE,
         
         // command line for SCGI-daemon start:
-        //'SCGI_DAEMON_START_CMD' => dirname(__FILE__).'/scgi-daemon-start',
+        //'SCGI_DAEMON_START_CMD' => escapeshellarg(dirname(__FILE__).'/scgi-daemon-start'),
     );
     
     return $conf;
