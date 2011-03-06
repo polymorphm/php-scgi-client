@@ -80,9 +80,8 @@ function php_scgi_client__get_conf() {
     if(file_exists($conf_file)) {
         require_once $conf_file;
         
-        if(isset($PHP_SCGI_CLIENT_CONF__CONF)) {
-            $conf = array_merge($conf, $PHP_SCGI_CLIENT_CONF__CONF);
-        }
+        $conf = array_merge($conf,
+                php_scgi_client_conf__get_conf());
     }
     
     return $conf;
