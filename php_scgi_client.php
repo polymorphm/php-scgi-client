@@ -40,6 +40,9 @@ $php_scgi_client__post_data_cache = NULL;
 class php_scgi_client__error
         extends Exception {}
 
+class php_scgi_client__connection_error
+        extends php_scgi_client__error {}
+
 function php_scgi_client__get_cgi_environ() {
     global $PHP_SCGI_CLIENT__CGI_ENVIRON_BLACK_LIST;
     
@@ -100,7 +103,7 @@ function php_scgi_client__fsockopen_or_error() {
     } else {
         @fclose($fd);
         
-        throw new php_scgi_client__error($socket_file.': Can\'t connect to socket file');
+        throw new php_scgi_client__connection_error($socket_file.': Can\'t connect to socket file');
     }
 }
 
