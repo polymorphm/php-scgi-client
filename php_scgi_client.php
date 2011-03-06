@@ -111,7 +111,6 @@ function php_scgi_client__fsockopen() {
         
         if($conf['SCGI_DAEMON_AUTO_START']) {
             $cmd = $conf['SCGI_DAEMON_START_CMD'];
-            $slp = $conf['SCGI_DAEMON_START_SLEEP'];
             
             if(!$cmd) {
                 throw new php_scgi_client__error('Parameter \'SCGI_DAEMON_START_CMD\' is not configured');
