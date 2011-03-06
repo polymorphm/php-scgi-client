@@ -8,7 +8,7 @@ pid_file="$(pwd)/var/scgi-daemon.pid"
 
 cd path/to/scgi-daemon/work/directory/
 
-exec flock -xn "$lock_file" python ./manage.py \
+exec flock -xn "$lock_file" python manage.py \
         runfcgi protocol=scgi \
         method=threaded \
         socket="$socket_file" \
