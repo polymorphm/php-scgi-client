@@ -191,6 +191,7 @@ function php_scgi_client__main() {
         
         @fclose($fd);
     } catch(php_scgi_client__error $e) {
+        @header($_SERVER['SERVER_PROTOCOL'].' 500 Internal Server Error');
         @header('Content-Type: text/plain;charset=utf-8');
         
         echo 'Error: '.$e->getMessage();
