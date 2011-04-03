@@ -1,5 +1,6 @@
 <?php
-
+// -*- mode: php; coding: utf-8 -*-
+//
 // Copyright 2011 Andrej A Antonov <polymorphm@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
