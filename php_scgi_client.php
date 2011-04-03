@@ -20,6 +20,7 @@ $PHP_SCGI_CLIENT__DEFAULT_CONF = array(
     'SOCKET_FILE' => NULL,
     'SCGI_DAEMON_AUTO_START' => FALSE,
     'SCGI_DAEMON_START_CMD' => escapeshellarg(dirname(__FILE__).'/scgi-daemon-start'),
+    'SCGI_DAEMON_START_CMD_SLEEP' => 3.0,
 );
 
 $PHP_SCGI_CLIENT__CGI_ENVIRON_BLACK_LIST = array(
@@ -118,6 +119,7 @@ function php_scgi_client__fsockopen() {
             
             // start SCGI-daemon:
             system($cmd);
+            sleep($conf['SCGI_DAEMON_START_CMD_SLEEP']);
             
             // second trying to connect:
             $fd = php_scgi_client__fsockopen_or_error();
