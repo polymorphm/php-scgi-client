@@ -21,7 +21,7 @@ $PHP_SCGI_CLIENT__DEFAULT_CONF = array(
     'SCGI_DAEMON_AUTO_START' => FALSE,
     'SCGI_DAEMON_START_CMD' => escapeshellarg(dirname(__FILE__).'/scgi-daemon-start'),
     'SCGI_DAEMON_START_CMD_SLEEP' => 3.0,
-    'ADDITIONAL_HEADERS_HOOK' => NULL,
+    'GET_CGI_ENVIRON_HOOK' => NULL,
     'HTTP_X_POWERED_BY' => 'php-scgi-client (2011-03-04-php-scgi-client at github.com)',
 );
 
@@ -58,6 +58,15 @@ function php_scgi_client__get_cgi_environ() {
         if(!in_array($k, $PHP_SCGI_CLIENT__CGI_ENVIRON_BLACK_LIST)) {
             $environ[$k] = strval($v);
         }
+    }
+    
+    $conf = php_scgi_client__get_conf();
+    $get_cgi_environ_hook = $conf['GET_CGI_ENVIRON_HOOK'];
+    
+    if($get_cgi_environ_hook) {
+        require_once $get_cgi_environ_hook;
+        
+        php_scgi_client__get_cgi_environ_hook($environ);
     }
     
     return $environ;
@@ -168,14 +177,7 @@ function php_scgi_client__format_status_header($header) {
 
 function php_scgi_client__additional_headers() {
     $conf = php_scgi_client__get_conf();
-    $additional_headers_hook = $conf['ADDITIONAL_HEADERS_HOOK'];
     $http_x_powered_by = $conf['HTTP_X_POWERED_BY'];
-    
-    if($additional_headers_hook) {
-        require $additional_headers_hook;
-        
-        php_scgi_client__additional_headers_hook();
-    }
     
     if($http_x_powered_by) {
         header('X-Powered-By: '.$conf['HTTP_X_POWERED_BY'], FALSE);
