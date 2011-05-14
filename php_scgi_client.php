@@ -160,16 +160,23 @@ function php_scgi_client__format_output() {
     return $output;
 }
 
-function php_scgi_client__fix_status_header($header) {
+function php_scgi_client__format_status_header($status_value) {
     // Apache HTTP Server -- not understands header "Status: ..."
     // but it understands header "HTTP/X.Y ..."
     
-    if(!array_key_exists('SERVER_PROTOCOL', $_SERVER)) {
+    if(!array_key_exists('SERVER_PROTOCOL', $_SERVER) || !$_SERVER['SERVER_PROTOCOL']) {
         throw new php_scgi_client__error('HTTP-server not defined parameter \'SERVER_PROTOCOL\'');
     }
     
+    $header = $_SERVER['SERVER_PROTOCOL'].' '.$status_value;
+    
+    return $header;
+}
+
+function php_scgi_client__fix_status_header($header) {
     if(substr($header, 0, strlen('Status: '))) {
-        $header = $_SERVER['SERVER_PROTOCOL'].' '.substr($header, strlen('Status: '));
+        $status_value = substr($header, strlen('Status: '));
+        $header = php_scgi_client__format_status_header($status_value);
     }
     
     return $header;
@@ -241,7 +248,7 @@ function php_scgi_client__main() {
             }
         }
     } catch(php_scgi_client__error $e) {
-        @header($_SERVER['SERVER_PROTOCOL'].' 500 Internal Server Error');
+        @header(php_scgi_client__format_status_header('500 Internal Server Error'));
         @header('Content-Type: text/plain;charset=utf-8');
         
         echo 'Error: '.$e->getMessage();
