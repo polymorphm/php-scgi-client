@@ -160,7 +160,7 @@ function php_scgi_client__format_output() {
     return $output;
 }
 
-function php_scgi_client__format_status_header($header) {
+function php_scgi_client__fix_status_header($header) {
     // Apache HTTP Server -- not understands header "Status: ..."
     // but it understands header "HTTP/X.Y ..."
     
@@ -216,7 +216,7 @@ function php_scgi_client__main() {
             if($header) {
                 if($is_first_header) {
                     $is_first_header = FALSE;
-                    $header = php_scgi_client__format_status_header($header);
+                    $header = php_scgi_client__fix_status_header($header);
                 }
                 
                 header($header, FALSE);
