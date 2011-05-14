@@ -180,7 +180,7 @@ function php_scgi_client__additional_headers() {
     $http_x_powered_by = $conf['HTTP_X_POWERED_BY'];
     
     if($http_x_powered_by) {
-        header('X-Powered-By: '.$conf['HTTP_X_POWERED_BY'], FALSE);
+        header('X-Powered-By: '.$http_x_powered_by, FALSE);
     }
 }
 
