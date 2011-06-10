@@ -23,6 +23,7 @@ $PHP_SCGI_CLIENT__DEFAULT_CONF = array(
     'SCGI_DAEMON_START_CMD_SLEEP' => 3.0,
     'GET_CGI_ENVIRON_HOOK' => NULL,
     'HTTP_X_POWERED_BY' => 'php-scgi-client (2011-03-04-php-scgi-client at github.com)',
+    'SHOW_RESPONSE_TIME' => TRUE,
 );
 
 $PHP_SCGI_CLIENT__CGI_ENVIRON_BLACK_LIST = array(
@@ -182,18 +183,58 @@ function php_scgi_client__fix_status_header($header) {
     return $header;
 }
 
-function php_scgi_client__additional_headers() {
+function php_scgi_client__additional_headers($kwargs=NULL) {
     $conf = php_scgi_client__get_conf();
     $http_x_powered_by = $conf['HTTP_X_POWERED_BY'];
     
     if($http_x_powered_by) {
         header('X-Powered-By: '.$http_x_powered_by, FALSE);
     }
+    
+    if($kwargs && array_key_exists('response_time', $kwargs)) {
+        $response_time = $kwargs['response_time'];
+        $show_response_time = $conf['SHOW_RESPONSE_TIME'];
+        
+        if($show_response_time) {
+            header('X-Response-Time: '.$response_time, FALSE);
+        }
+    }
+}
+
+function php_scgi_client__get_microtime() {
+    $raw_microtime = microtime();
+    
+    list($usec, $sec) = explode(' ', $raw_microtime);
+    $microtime = array(
+        'sec' => intval($sec),
+        'usec' => floatval($usec),
+    );
+    
+    return $microtime;
+}
+
+function php_scgi_client__get_microtime_subtraction($begin_mt) {
+    $end_mt = php_scgi_client__get_microtime();
+    
+    $accuracy = 0x0100;
+    
+    $begin_t = $begin_mt['sec'] % $accuracy + $begin_mt['usec'];
+    $end_t = $end_mt['sec'] % $accuracy + $end_mt['usec'];
+    
+    $sub_t = $end_t - $begin_t;
+    
+    if($sub_t < 0) {
+        $sub_t += $accuracy;
+    }
+    
+    return $sub_t;
 }
 
 function php_scgi_client__main() {
     try {
         $fd = php_scgi_client__fsockopen();
+        
+        $begin_response_mt = php_scgi_client__get_microtime();
         
         $output = php_scgi_client__format_output();
         
@@ -232,7 +273,11 @@ function php_scgi_client__main() {
             }
         }
         
-        php_scgi_client__additional_headers();
+        $response_time = php_scgi_client__get_microtime_subtraction($begin_response_mt);
+        
+        php_scgi_client__additional_headers(array(
+            'response_time' => $response_time,
+        ));
         
         for(;;) {
             if(!feof($fd)) {
