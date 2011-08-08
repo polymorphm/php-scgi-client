@@ -73,11 +73,73 @@ function php_scgi_client__get_cgi_environ() {
     return $environ;
 }
 
-function php_scgi_client__get_post_data() {
+function php_scgi_client__stripslashes_if_gpc($str) {
+    if(function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
+        $str = stripslashes($str);
+    }
+    
+    return $str;
+}
+
+function php_scgi_client__format_multipart_post_data(&$environ) {
+    $boundary = '--------------------'.
+            rand(0,99999999).'-'.rand(0,99999999).
+            '-'.rand(0,99999999).'-'.rand(0,99999999);
+    
+    $result_list = array();
+    
+    foreach($_POST as $name => $raw_data) {
+        $data = php_scgi_client__stripslashes_if_gpc($raw_data);
+        
+        $result_list []= sprintf('--%s', $boundary);
+        $result_list []= sprintf('Content-Disposition: form-data;name="%s"',
+                str_replace("\n", "\\n", str_replace("\"", "\\\"", str_replace("\\", "\\\\", $name))));
+        $result_list []= '';
+        $result_list []= $data;
+    }
+    
+    foreach($_FILES as $name => $file_info) {
+        if(array_key_exists('tmp_name', $file_info) && $file_info['tmp_name']) {
+            $data = file_get_contents($file_info['tmp_name']);
+        } else {
+            $data = '';
+        }
+        
+        $file_name = array_key_exists('name', $file_info)?
+                $file_info['name']:$name;
+        $file_type = array_key_exists('type', $file_info) && $file_info['type']?
+                $file_info['type']:'application/octet-stream';
+        
+        $result_list []= sprintf('--%s', $boundary);
+        $result_list []= sprintf('Content-Disposition: form-data;name="%s";filename="%s"',
+                str_replace("\n", "\\n", str_replace("\"", "\\\"", str_replace("\\", "\\\\", $name))),
+                str_replace("\n", "\\n", str_replace("\"", "\\\"", str_replace("\\", "\\\\", $file_name))));
+        $result_list []= 'Content-Type: '.$file_type;
+        $result_list []= '';
+        $result_list []= $data;
+    }
+    
+    $result_list []= sprintf('--%s--', $boundary);
+    
+    $result = join("\r\n", $result_list);
+    $environ['CONTENT_TYPE'] = 'multipart/form-data;boundary='.$boundary;
+    
+    return $result;
+}
+
+function php_scgi_client__get_post_data(&$environ) {
     global $php_scgi_client__post_data_cache;
     
     if($php_scgi_client__post_data_cache === NULL) {
         $php_scgi_client__post_data_cache = file_get_contents('php://input');
+        
+        if(array_key_exists('CONTENT_TYPE', $environ) &&
+                substr($environ['CONTENT_TYPE'], 0, strlen('multipart/form-data;'))
+                == 'multipart/form-data;' &&
+                !strlen($php_scgi_client__post_data_cache)) {
+            $php_scgi_client__post_data_cache =
+                    php_scgi_client__format_multipart_post_data($environ);
+        }
     }
     
     return $php_scgi_client__post_data_cache;
@@ -145,7 +207,7 @@ function php_scgi_client__fsockopen() {
 
 function php_scgi_client__format_output() {
     $environ = php_scgi_client__get_cgi_environ();
-    $post_data = php_scgi_client__get_post_data();
+    $post_data = php_scgi_client__get_post_data($environ);
     $content_length = strlen($post_data);
     
     $headers =
