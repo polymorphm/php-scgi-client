@@ -89,7 +89,7 @@ function php_scgi_client__format_multipart_post_data(&$environ) {
     $result_list = array();
     
     foreach($_POST as $name => $raw_data) {
-        $data = php_scgi_client__stripslashes_if_gpc($raw_data);
+        $data = php_scgi_client__stripslashes_if_gpc(strval($raw_data));
         
         $result_list []= sprintf('--%s', $boundary);
         $result_list []= sprintf('Content-Disposition: form-data;name="%s"',
@@ -100,15 +100,16 @@ function php_scgi_client__format_multipart_post_data(&$environ) {
     
     foreach($_FILES as $name => $file_info) {
         if(array_key_exists('tmp_name', $file_info) && $file_info['tmp_name']) {
-            $data = file_get_contents($file_info['tmp_name']);
+            $data_path = strval($file_info['tmp_name']);
+            $data = @file_get_contents($data_path);
         } else {
             $data = '';
         }
         
         $file_name = array_key_exists('name', $file_info)?
-                $file_info['name']:$name;
+                strval($file_info['name']):$name;
         $file_type = array_key_exists('type', $file_info) && $file_info['type']?
-                $file_info['type']:'application/octet-stream';
+                strval($file_info['type']):'application/octet-stream';
         
         $result_list []= sprintf('--%s', $boundary);
         $result_list []= sprintf('Content-Disposition: form-data;name="%s";filename="%s"',
