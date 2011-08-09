@@ -238,7 +238,7 @@ function php_scgi_client__format_status_header($status_value) {
 }
 
 function php_scgi_client__fix_status_header($header) {
-    if(substr($header, 0, strlen('Status: '))) {
+    if(substr($header, 0, strlen('Status: ')) == 'Status: ') {
         $status_value = substr($header, strlen('Status: '));
         $header = php_scgi_client__format_status_header($status_value);
     }
