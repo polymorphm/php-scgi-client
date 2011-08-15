@@ -89,6 +89,8 @@ function php_scgi_client__get_conf() {
     
     $conf = $PHP_SCGI_CLIENT__DEFAULT_CONF;
     if(!$PHP_SCGI_CLIENT__CONF_PATH) {
+        // using not initialized constant '$PHP_SCGI_CLIENT__CONF_PATH' is deprecated.
+        
         $PHP_SCGI_CLIENT__CONF_PATH = dirname(__FILE__).'/php_scgi_client_conf.php';
     }
     
