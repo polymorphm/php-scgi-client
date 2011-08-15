@@ -85,12 +85,15 @@ function php_scgi_client__get_post_data() {
 
 function php_scgi_client__get_conf() {
     global $PHP_SCGI_CLIENT__DEFAULT_CONF;
+    global $PHP_SCGI_CLIENT__CONF_PATH;
     
     $conf = $PHP_SCGI_CLIENT__DEFAULT_CONF;
-    $conf_file = dirname(__FILE__).'/php_scgi_client_conf.php';
+    if(!$PHP_SCGI_CLIENT__CONF_PATH) {
+        $PHP_SCGI_CLIENT__CONF_PATH = dirname(__FILE__).'/php_scgi_client_conf.php';
+    }
     
-    if(file_exists($conf_file)) {
-        require_once $conf_file;
+    if(file_exists($PHP_SCGI_CLIENT__CONF_PATH)) {
+        require_once $PHP_SCGI_CLIENT__CONF_PATH;
         
         $conf = array_merge($conf,
                 php_scgi_client_conf__get_conf());

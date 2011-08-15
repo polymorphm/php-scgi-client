@@ -21,5 +21,8 @@ if (!ini_get('display_errors')) {
 }
 error_reporting(E_ALL);
 
+global $PHP_SCGI_CLIENT__CONF_PATH;
+$PHP_SCGI_CLIENT__CONF_PATH = dirname(__FILE__).'/../php_scgi_client_conf.php';
+
 require_once dirname(__FILE__).'/../php_scgi_client.php';
 php_scgi_client__main();
