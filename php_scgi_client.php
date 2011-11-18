@@ -61,6 +61,13 @@ function php_scgi_client__get_cgi_environ() {
         }
     }
     
+    if (array_key_exists('REDIRECT_URL', $_SERVER)) {
+        $environ['PATH_INFO'] = $_SERVER['REDIRECT_URL'];
+    }
+    if (array_key_exists('REDIRECT_QUERY_STRING', $_SERVER)) {
+        $environ['QUERY_STRING'] = $_SERVER['REDIRECT_QUERY_STRING'];
+    }
+    
     $conf = php_scgi_client__get_conf();
     $get_cgi_environ_hook = $conf['GET_CGI_ENVIRON_HOOK'];
     
