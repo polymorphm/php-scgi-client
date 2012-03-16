@@ -1,7 +1,7 @@
 <?php
 // -*- mode: php; coding: utf-8 -*-
 //
-// Copyright 2011 Andrej A Antonov <polymorphm@gmail.com>
+// Copyright 2011, 2012 Andrej A Antonov <polymorphm@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -16,10 +16,15 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+function index__error_handler ($errno, $errstr) {
+    throw new ErrorException(sprintf('[%s] %s', $errno, $errstr));
+}
+
 if (!ini_get('display_errors')) {
     ini_set('display_errors', 1);
 }
-error_reporting(E_ALL);
+
+set_error_handler('index__error_handler');
 
 global $PHP_SCGI_CLIENT__CONF_PATH;
 $PHP_SCGI_CLIENT__CONF_PATH = dirname(__FILE__).'/../php_scgi_client_conf.php';

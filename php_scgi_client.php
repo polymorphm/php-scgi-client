@@ -1,7 +1,7 @@
 <?php
 // -*- mode: php; coding: utf-8 -*-
 //
-// Copyright 2011 Andrej A Antonov <polymorphm@gmail.com>
+// Copyright 2011, 2012 Andrej A Antonov <polymorphm@gmail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -108,7 +108,7 @@ function php_scgi_client__format_multipart_post_data(&$environ) {
     foreach($_FILES as $name => $file_info) {
         if(array_key_exists('tmp_name', $file_info) && $file_info['tmp_name']) {
             $data_path = strval($file_info['tmp_name']);
-            $data = @file_get_contents($data_path);
+            $data = file_get_contents($data_path);
         } else {
             $data = '';
         }
@@ -176,7 +176,11 @@ function php_scgi_client__fsockopen_or_error() {
         throw new php_scgi_client__error('Parameter \'SOCKET_FILE\' is not configured');
     }
     
-    $fd = @fsockopen($socket_file);
+    try {
+        $fd = fsockopen($socket_file);
+    } catch (ErrorException $e) {
+        $fd = NULL;
+    }
     
     if($fd) {
         return $fd;
@@ -308,18 +312,18 @@ function php_scgi_client__main() {
         $output = php_scgi_client__format_output();
         
         for($all_written = 0; $all_written < strlen($output); $all_written += $written) {
-            $written = @fwrite($fd, substr($output, $all_written));
+            $written = fwrite($fd, substr($output, $all_written));
             if($written === FALSE || !$written) {
                 break;
             }
         }
         
-        @fflush($fd);
+        fflush($fd);
         
         $is_first_header = TRUE;
         for(;;) {
             if(!feof($fd)) {
-                $raw_header = @fgets($fd);
+                $raw_header = fgets($fd);
             } else {
                 break;
             }
@@ -350,7 +354,7 @@ function php_scgi_client__main() {
         
         for(;;) {
             if(!feof($fd)) {
-                $data = @fread($fd, 8192);
+                $data = fread($fd, 8192);
             } else {
                 break;
             }
@@ -361,14 +365,16 @@ function php_scgi_client__main() {
                 break;
             }
         }
-    } catch(php_scgi_client__error $e) {
-        @header(php_scgi_client__format_status_header('500 Internal Server Error'));
-        @header('Content-Type: text/plain;charset=utf-8');
+    } catch(Exception $e) {
+        if (!headers_sent()) {
+            header(php_scgi_client__format_status_header('500 Internal Server Error'));
+            header('Content-Type: text/plain;charset=utf-8');
+        }
         
         echo 'Error: '.$e->getMessage();
     }
     
     if(isset($fd)) {
-        @fclose($fd);
+        fclose($fd);
     }
 }
