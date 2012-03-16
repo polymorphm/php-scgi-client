@@ -6,4 +6,4 @@ PHP SCGI Client -- is PHP-script for connecting to SCGI-daemon over Apache HTTP 
 Status
 ------
 
-Current status of project -- is *developing*
+Current status of project -- is *beta* (all works, but not so well tested)
