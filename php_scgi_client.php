@@ -46,7 +46,7 @@ class php_scgi_client__error
 class php_scgi_client__connection_error
         extends php_scgi_client__error {}
 
-function php_scgi_client__get_cgi_environ() {
+function php_scgi_client__get_cgi_environ () {
     global $PHP_SCGI_CLIENT__CGI_ENVIRON_BLACK_LIST;
     
     $environ = array(
@@ -55,8 +55,8 @@ function php_scgi_client__get_cgi_environ() {
         'QUERY_STRING' => '',
     );
     
-    foreach($_SERVER as $k => $v) {
-        if(!in_array($k, $PHP_SCGI_CLIENT__CGI_ENVIRON_BLACK_LIST)) {
+    foreach ($_SERVER as $k => $v) {
+        if (!in_array($k, $PHP_SCGI_CLIENT__CGI_ENVIRON_BLACK_LIST)) {
             $environ[$k] = strval($v);
         }
     }
@@ -71,7 +71,7 @@ function php_scgi_client__get_cgi_environ() {
     $conf = php_scgi_client__get_conf();
     $get_cgi_environ_hook = $conf['GET_CGI_ENVIRON_HOOK'];
     
-    if($get_cgi_environ_hook) {
+    if ($get_cgi_environ_hook) {
         require_once $get_cgi_environ_hook;
         
         php_scgi_client__get_cgi_environ_hook($environ);
@@ -80,22 +80,22 @@ function php_scgi_client__get_cgi_environ() {
     return $environ;
 }
 
-function php_scgi_client__stripslashes_if_gpc($str) {
-    if(function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
+function php_scgi_client__stripslashes_if_gpc ($str) {
+    if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
         $str = stripslashes($str);
     }
     
     return $str;
 }
 
-function php_scgi_client__format_multipart_post_data(&$environ) {
+function php_scgi_client__format_multipart_post_data (&$environ) {
     $boundary = '--------------------'.
             rand(0,99999999).'-'.rand(0,99999999).
             '-'.rand(0,99999999).'-'.rand(0,99999999);
     
     $result_list = array();
     
-    foreach($_POST as $name => $raw_data) {
+    foreach ($_POST as $name => $raw_data) {
         $data = php_scgi_client__stripslashes_if_gpc(strval($raw_data));
         
         $result_list []= sprintf('--%s', $boundary);
@@ -105,8 +105,8 @@ function php_scgi_client__format_multipart_post_data(&$environ) {
         $result_list []= $data;
     }
     
-    foreach($_FILES as $name => $file_info) {
-        if(array_key_exists('tmp_name', $file_info) && $file_info['tmp_name']) {
+    foreach ($_FILES as $name => $file_info) {
+        if (array_key_exists('tmp_name', $file_info) && $file_info['tmp_name']) {
             $data_path = strval($file_info['tmp_name']);
             $data = file_get_contents($data_path);
         } else {
@@ -135,13 +135,13 @@ function php_scgi_client__format_multipart_post_data(&$environ) {
     return $result;
 }
 
-function php_scgi_client__get_post_data(&$environ) {
+function php_scgi_client__get_post_data (&$environ) {
     global $php_scgi_client__post_data_cache;
     
-    if($php_scgi_client__post_data_cache === NULL) {
+    if ($php_scgi_client__post_data_cache === NULL) {
         $php_scgi_client__post_data_cache = file_get_contents('php://input');
         
-        if(array_key_exists('CONTENT_TYPE', $environ) &&
+        if (array_key_exists('CONTENT_TYPE', $environ) &&
                 substr($environ['CONTENT_TYPE'], 0, strlen('multipart/form-data;'))
                 == 'multipart/form-data;' &&
                 !strlen($php_scgi_client__post_data_cache)) {
@@ -153,12 +153,12 @@ function php_scgi_client__get_post_data(&$environ) {
     return $php_scgi_client__post_data_cache;
 }
 
-function php_scgi_client__get_conf() {
+function php_scgi_client__get_conf () {
     global $PHP_SCGI_CLIENT__DEFAULT_CONF;
     global $PHP_SCGI_CLIENT__CONF_PATH;
     
     $conf = $PHP_SCGI_CLIENT__DEFAULT_CONF;
-    if($PHP_SCGI_CLIENT__CONF_PATH && file_exists($PHP_SCGI_CLIENT__CONF_PATH)) {
+    if ($PHP_SCGI_CLIENT__CONF_PATH && file_exists($PHP_SCGI_CLIENT__CONF_PATH)) {
         require_once $PHP_SCGI_CLIENT__CONF_PATH;
         
         $conf = array_merge($conf,
@@ -168,11 +168,11 @@ function php_scgi_client__get_conf() {
     return $conf;
 }
 
-function php_scgi_client__fsockopen_or_error() {
+function php_scgi_client__fsockopen_or_error () {
     $conf = php_scgi_client__get_conf();
     $socket_file = $conf['SOCKET_FILE'];
     
-    if(!$socket_file) {
+    if (!$socket_file) {
         throw new php_scgi_client__error('Parameter \'SOCKET_FILE\' is not configured');
     }
     
@@ -182,23 +182,23 @@ function php_scgi_client__fsockopen_or_error() {
         $fd = NULL;
     }
     
-    if($fd) {
+    if ($fd) {
         return $fd;
     } else {
         throw new php_scgi_client__connection_error($socket_file.': Can\'t connect to socket file');
     }
 }
 
-function php_scgi_client__fsockopen() {
+function php_scgi_client__fsockopen () {
     try {
         $fd = php_scgi_client__fsockopen_or_error();
-    } catch(php_scgi_client__connection_error $e) {
+    } catch (php_scgi_client__connection_error $e) {
         $conf = php_scgi_client__get_conf();
         
-        if($conf['SCGI_DAEMON_AUTO_START']) {
+        if ($conf['SCGI_DAEMON_AUTO_START']) {
             $cmd = $conf['SCGI_DAEMON_START_CMD'];
             
-            if(!$cmd) {
+            if (!$cmd) {
                 throw new php_scgi_client__error('Parameter \'SCGI_DAEMON_START_CMD\' is not configured');
             }
             
@@ -216,7 +216,7 @@ function php_scgi_client__fsockopen() {
     return $fd;
 }
 
-function php_scgi_client__format_output() {
+function php_scgi_client__format_output () {
     $environ = php_scgi_client__get_cgi_environ();
     $post_data = php_scgi_client__get_post_data($environ);
     $content_length = strlen($post_data);
@@ -225,7 +225,7 @@ function php_scgi_client__format_output() {
             sprintf("%s\x00%s\x00", 'CONTENT_LENGTH', $content_length).
             sprintf("%s\x00%s\x00", 'SCGI', 1);
     
-    foreach($environ as $k => $v) {
+    foreach ($environ as $k => $v) {
         $headers .= sprintf("%s\x00%s\x00", $k, $v);
     }
     
@@ -234,11 +234,11 @@ function php_scgi_client__format_output() {
     return $output;
 }
 
-function php_scgi_client__format_status_header($status_value) {
+function php_scgi_client__format_status_header ($status_value) {
     // Apache HTTP Server -- not understands header "Status: ..."
     // but it understands header "HTTP/X.Y ..."
     
-    if(!array_key_exists('SERVER_PROTOCOL', $_SERVER) || !$_SERVER['SERVER_PROTOCOL']) {
+    if (!array_key_exists('SERVER_PROTOCOL', $_SERVER) || !$_SERVER['SERVER_PROTOCOL']) {
         throw new php_scgi_client__error('HTTP-server not defined parameter \'SERVER_PROTOCOL\'');
     }
     
@@ -247,8 +247,8 @@ function php_scgi_client__format_status_header($status_value) {
     return $header;
 }
 
-function php_scgi_client__fix_status_header($header) {
-    if(substr($header, 0, strlen('Status: ')) == 'Status: ') {
+function php_scgi_client__fix_status_header ($header) {
+    if (substr($header, 0, strlen('Status: ')) == 'Status: ') {
         $status_value = substr($header, strlen('Status: '));
         $header = php_scgi_client__format_status_header($status_value);
     }
@@ -256,28 +256,28 @@ function php_scgi_client__fix_status_header($header) {
     return $header;
 }
 
-function php_scgi_client__additional_headers($kwargs=NULL) {
+function php_scgi_client__additional_headers ($kwargs=NULL) {
     $conf = php_scgi_client__get_conf();
     $http_x_powered_by = $conf['HTTP_X_POWERED_BY'];
     
-    if($http_x_powered_by) {
+    if ($http_x_powered_by) {
         header('X-Powered-By: '.$http_x_powered_by, FALSE);
     }
     
-    if($kwargs && array_key_exists('response_time', $kwargs)) {
+    if ($kwargs && array_key_exists('response_time', $kwargs)) {
         $response_time = $kwargs['response_time'];
         $show_response_time = $conf['SHOW_RESPONSE_TIME'];
         
-        if($show_response_time) {
+        if ($show_response_time) {
             header('X-Response-Time: '.$response_time, FALSE);
         }
     }
 }
 
-function php_scgi_client__get_microtime() {
+function php_scgi_client__get_microtime () {
     $raw_microtime = microtime();
     
-    list($usec, $sec) = explode(' ', $raw_microtime);
+    list ($usec, $sec) = explode(' ', $raw_microtime);
     $microtime = array(
         'sec' => intval($sec),
         'usec' => floatval($usec),
@@ -286,7 +286,7 @@ function php_scgi_client__get_microtime() {
     return $microtime;
 }
 
-function php_scgi_client__get_microtime_subtraction($begin_mt) {
+function php_scgi_client__get_microtime_subtraction ($begin_mt) {
     $end_mt = php_scgi_client__get_microtime();
     
     $accuracy = 0x0100;
@@ -296,14 +296,14 @@ function php_scgi_client__get_microtime_subtraction($begin_mt) {
     
     $sub_t = $end_t - $begin_t;
     
-    if($sub_t < 0) {
+    if ($sub_t < 0) {
         $sub_t += $accuracy;
     }
     
     return $sub_t;
 }
 
-function php_scgi_client__main() {
+function php_scgi_client__main () {
     try {
         $fd = php_scgi_client__fsockopen();
         
@@ -311,9 +311,9 @@ function php_scgi_client__main() {
         
         $output = php_scgi_client__format_output();
         
-        for($all_written = 0; $all_written < strlen($output); $all_written += $written) {
+        for ($all_written = 0; $all_written < strlen($output); $all_written += $written) {
             $written = fwrite($fd, substr($output, $all_written));
-            if($written === FALSE || !$written) {
+            if ($written === FALSE || !$written) {
                 break;
             }
         }
@@ -321,21 +321,21 @@ function php_scgi_client__main() {
         fflush($fd);
         
         $is_first_header = TRUE;
-        for(;;) {
-            if(!feof($fd)) {
+        for (;;) {
+            if (!feof($fd)) {
                 $raw_header = fgets($fd);
             } else {
                 break;
             }
             
-            if($raw_header !== FALSE && strlen($raw_header) !== 0) {
+            if ($raw_header !== FALSE && strlen($raw_header) !== 0) {
                 $header = trim($raw_header);
             } else {
                 break;
             }
             
-            if($header) {
-                if($is_first_header) {
+            if ($header) {
+                if ($is_first_header) {
                     $is_first_header = FALSE;
                     $header = php_scgi_client__fix_status_header($header);
                 }
@@ -352,20 +352,20 @@ function php_scgi_client__main() {
             'response_time' => $response_time,
         ));
         
-        for(;;) {
-            if(!feof($fd)) {
+        for (;;) {
+            if (!feof($fd)) {
                 $data = fread($fd, 8192);
             } else {
                 break;
             }
             
-            if($data !== FALSE && strlen($data) !== 0) {
+            if ($data !== FALSE && strlen($data) !== 0) {
                 echo $data;
             } else {
                 break;
             }
         }
-    } catch(Exception $e) {
+    } catch (Exception $e) {
         if (!headers_sent()) {
             header(php_scgi_client__format_status_header('500 Internal Server Error'));
             header('Content-Type: text/plain;charset=utf-8');
@@ -374,7 +374,7 @@ function php_scgi_client__main() {
         echo 'Error: '.$e->getMessage();
     }
     
-    if(isset($fd)) {
+    if (isset($fd)) {
         fclose($fd);
     }
 }
