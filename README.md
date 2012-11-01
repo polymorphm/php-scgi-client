@@ -6,4 +6,4 @@ PHP SCGI Client
 Status
 ------
 
-Current status of project (this branch) -- is *developing*
+Current status of project (this branch) -- is *beta*
