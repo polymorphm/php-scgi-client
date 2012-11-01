@@ -14,7 +14,14 @@ function php_scgi_client_conf__get_conf () {
         
         // Delay (in seconds) after SCGI-daemon start:
         //'SCGI_DAEMON_START_CMD_SLEEP' => 3.0, // this is default value
+        
+        // Using modified environ values:
+        //'USE_CGI_ENVIRON_HOOK' => TRUE, // default value is FALSE
     );
     
     return $conf;
 }
+
+// function php_scgi_client_conf__cgi_environ_hook (&$environ) {
+//      $environ['PATH_INFO'] = '/this/is/example/path';
+//}

@@ -21,7 +21,7 @@ $PHP_SCGI_CLIENT__DEFAULT_CONF = array(
     'SCGI_DAEMON_AUTO_START' => FALSE,
     'SCGI_DAEMON_START_CMD' => escapeshellarg(dirname(__FILE__).'/scgi-daemon-start'),
     'SCGI_DAEMON_START_CMD_SLEEP' => 3.0,
-    'GET_CGI_ENVIRON_HOOK' => NULL,
+    'USE_CGI_ENVIRON_HOOK' => FALSE,
     'HTTP_X_POWERED_BY' => 'php-scgi-client (2011-03-04-php-scgi-client at github.com)',
     'SHOW_RESPONSE_TIME' => TRUE,
 );
@@ -69,12 +69,10 @@ function php_scgi_client__get_cgi_environ () {
     }
     
     $conf = php_scgi_client__get_conf();
-    $get_cgi_environ_hook = $conf['GET_CGI_ENVIRON_HOOK'];
+    $use_cgi_environ_hook = $conf['USE_CGI_ENVIRON_HOOK'];
     
-    if ($get_cgi_environ_hook) {
-        require_once $get_cgi_environ_hook;
-        
-        php_scgi_client__get_cgi_environ_hook($environ);
+    if ($use_cgi_environ_hook) {
+        php_scgi_client_conf__cgi_environ_hook($environ);
     }
     
     return $environ;
